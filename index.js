@@ -48,7 +48,7 @@ async function main() {
     // go check to see if work item already exists in azure devops or not
     // based on the title and tags
     console.log("Check to see if work item already exists");
-    let workItem = await find(vm);
+    let workItem = await find(vm);    
     let issue = "";
 
     // if workItem == -1 then we have an error during find
@@ -59,7 +59,7 @@ async function main() {
     }
 
     // if a work item was not found, go create one
-    if (workItem === null) {
+    if (workItem === null && !vm.title.includes("AB#")) {
       console.log("No work item found, creating work item from issue");
       workItem = await create(vm);
 
@@ -84,7 +84,17 @@ async function main() {
       
       issue = vm.env.ghToken != "" ? await updateIssueBody(vm, workItem) : "";
 
-    } else {
+    } else if (workItem === null && vm.action === "opened" && vm.title.includes("AB#")) {
+      try {
+        var findId = vm.title.lastIndexOf("AB#");
+        workItem = await client.getWorkItem(vm.title.substr(findId + 3, 5), null, null, 4);
+      } catch (error) {
+        console.log("Error: getWorkItem failure");
+        core.setFailed(error);
+      }
+      await update(vm, workItem);
+    }
+    else {
       console.log(`Existing work item found: ${workItem.id}`);
     }
 
