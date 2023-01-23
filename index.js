@@ -521,9 +521,6 @@ async function find(vm, id = null) {
       core.setFailed(error);
       return -1;
     }
-  } else {
-    return null;
-  }
   }
 
   let teamContext = { project: vm.env.project };
