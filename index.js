@@ -87,7 +87,7 @@ async function main() {
     } else if (workItem === null && vm.action === "opened" && vm.title.includes("AB#")) {
       var findId = vm.title.lastIndexOf("AB#");
       workItem = await find(vm, vm.title.substr(findId + 3, 5));
-      await update(vm, workItem);
+      await update(vm, workItem, true);
     }
     else if (workItem === null) {
       console.log(`Workitem not found in Azure at all shouldn't happen`);
