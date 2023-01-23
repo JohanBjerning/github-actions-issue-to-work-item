@@ -85,13 +85,8 @@ async function main() {
       issue = vm.env.ghToken != "" ? await updateIssueBody(vm, workItem) : "";
 
     } else if (workItem === null && vm.action === "opened" && vm.title.includes("AB#")) {
-      try {
-        var findId = vm.title.lastIndexOf("AB#");
-        workItem = await client.getWorkItem(vm.title.substr(findId + 3, 5), null, null, 4);
-      } catch (error) {
-        console.log("Error: getWorkItem failure");
-        core.setFailed(error);
-      }
+      var findId = vm.title.lastIndexOf("AB#");
+      workItem = await find(vm, vm.title.substr(findId + 3, 5));
       await update(vm, workItem);
     }
     else {
@@ -500,7 +495,7 @@ async function unlabel(vm, workItem) {
 }
 
 // find work item to see if it already exists
-async function find(vm) {
+async function find(vm, id = null) {
   if (vm.env.logLevel >= 200) console.log(`Starting 'find' method...`);
 
   let authHandler = azdev.getPersonalAccessTokenHandler(vm.env.adoToken);
@@ -515,6 +510,20 @@ async function find(vm) {
     console.log("Error: Connecting to organization. Check the spelling of the organization name and ensure your token is scoped correctly.");
     core.setFailed(error);
     return -1;
+  }
+
+  if(id) {
+    try {
+      var result = await client.getWorkItem(id, null, null, 4);
+      return result;
+    } catch (error) {
+      console.log("Error: getWorkItem failure");
+      core.setFailed(error);
+      return -1;
+    }
+  } else {
+    return null;
+  }
   }
 
   let teamContext = { project: vm.env.project };
