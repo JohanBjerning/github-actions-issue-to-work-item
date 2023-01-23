@@ -354,7 +354,7 @@ async function update(vm, workItem, newLink = false) {
   }
 
   if (patchDocument.length > 0) {
-    if (!commentEdited){
+    if (!commentEdited && !newLink){
       patchDocument.push({
         op: "add",
         path: "/fields/System.History",
