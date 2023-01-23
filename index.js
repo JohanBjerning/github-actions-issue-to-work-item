@@ -89,6 +89,9 @@ async function main() {
       workItem = await find(vm, vm.title.substr(findId + 3, 5));
       await update(vm, workItem);
     }
+    else if (workItem === null) {
+      console.log(`Workitem not found in Azure at all shouldn't happen`);
+    }    
     else {
       console.log(`Existing work item found: ${workItem.id}`);
     }
@@ -271,7 +274,7 @@ async function create(vm) {
 }
 
 // update existing working item
-async function update(vm, workItem) {
+async function update(vm, workItem, newLink = false) {
   if (vm.env.logLevel >= 200) console.log(`Starting 'update' method...`);
 
   var body = vm.body.replace(`AB#${workItem.id}`, '').trim();
@@ -287,7 +290,7 @@ async function update(vm, workItem) {
     patchDocument.push({
       op: "add",
       path: "/fields/System.Title",
-      value: vm.title + " (GitHub Issue #" + vm.number + ")",
+      value: workItem.fields["System.Title"] + " (GitHub Issue #" + vm.number + ")",
     });
   }
 
@@ -302,8 +305,31 @@ async function update(vm, workItem) {
         op: "add",
         path: "/fields/Microsoft.VSTS.TCM.ReproSteps",
         value: html,
-      }
+      },      
     );
+  }
+
+  if(newLink) {
+    patchDocument.push(
+      {
+        op: "add",
+        path: "/fields/System.Tags",
+        value: "GitHub Issue; " + vm.repo_name
+      },
+      {
+        op: "add",
+        path: "/relations/-",
+        value: {
+          rel: "Hyperlink",
+          url: vm.url
+        },
+      },
+      {
+        op: "add",
+        path: "/fields/System.History",
+        value: `GitHub <a href="${vm.url}" target="_new">issue #${vm.number}</a> created in <a href="${vm.repo_url}" target="_new">${vm.repo_fullname}</a> by ${vm.user}`
+      },
+    )
   }
 
   var commentEdited = false;
