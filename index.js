@@ -674,9 +674,9 @@ async function updateIssueBody(vm, workItem) {
   return null;
 }
 
-Date.prototype.iso8601Week = function () {
+function isoWeek () {
   // Create a copy of the current date, we don't want to mutate the original
-  const date = new Date(this.getTime());
+  const date = new Date();
 
   // Find Thursday of this week starting on Monday
   date.setDate(date.getDate() + 4 - (date.getDay() || 7));
@@ -722,7 +722,7 @@ function getValuesFromPayload(payload, env) {
 			ghToken: env.github_token != undefined ? env.github_token : "",
 			project: env.ado_project != undefined ? env.ado_project : "",
 			areaPath: env.ado_area_path != undefined ? env.ado_area_path : "",
-			iterationPath: `Hantera\\RnD Sprints\\${new Date().getFullYear()}\\Sprint ${Math.floor(new Date().iso8601Week() / 2)}`,
+			iterationPath: `Hantera\\RnD Sprints\\${new Date().getFullYear()}\\Sprint ${Math.floor(isoWeek() / 2)}`,
 			wit: env.ado_wit != undefined ? env.ado_wit : "Issue",
 			closedState: env.ado_close_state != undefined ? env.ado_close_state : "Closed",
 			newState: env.ado_new_state != undefined ? env.ado_new_state : "New",
